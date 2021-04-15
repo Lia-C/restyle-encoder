@@ -2,6 +2,8 @@
 
 `python cloneGAN.py --image_path='notebooks/images/face_img.jpg' --NUM_OUTPUT_IMAGES=6`
 
+The result images will be saved in the directory `./outputs`.
+
 ### Installation:
 
 ```
