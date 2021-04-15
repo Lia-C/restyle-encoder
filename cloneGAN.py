@@ -219,15 +219,16 @@ def project(image_path: str, NUM_OUTPUT_IMAGES: int):
 
     image_filename = os.path.splitext(os.path.basename(image_path))[0]
 
+
     # SAVE OUT ORIG AS IMG
-    input_image.save(f'./{image_filename}_orig.jpg')
+    input_image.resize(resize_amount).save(f'./outputs/{image_filename}_orig.jpg')
 
     # SAVE OUT EACH STEP AS AN IMG
     for idx, result in enumerate(result_images):
-        Image.fromarray(np.array(result.resize(resize_amount))).save(f'./{image_filename}_result_{idx}.jpg')
+        Image.fromarray(np.array(result.resize(resize_amount))).save(f'./outputs/{image_filename}_result_{idx}.jpg')
 
     # SAVE FINAL SUMMARY AS IMG
-    res.save(f'./{image_filename}_results.jpg')
+    res.save(f'./outputs/{image_filename}_results.jpg')
 
 
 def main():
@@ -238,6 +239,11 @@ def main():
 
     parser.add_argument('--image_path',      help='Target image file to project to', dest='image_path', required=True)
     parser.add_argument('--NUM_OUTPUT_IMAGES', help='Number of output images / steps to take', type=int, default=6)
+
+    # make sure output folder exists, otherwise saving won’t work
+    if not os.path.exists('./outputs/'):
+        os.makedirs('./outputs/')
+
     project(**vars(parser.parse_args()))
 
 #----------------------------------------------------------------------------
