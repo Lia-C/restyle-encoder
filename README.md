@@ -1,8 +1,3 @@
-### Usage: 
-
-`python cloneGAN.py --image_path='notebooks/images/face_img.jpg' --NUM_OUTPUT_IMAGES=6`
-
-The result images will be saved in the directory `./outputs`.
 
 ### Installation:
 
@@ -11,6 +6,18 @@ wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.z
 sudo unzip ninja-linux.zip -d /usr/local/bin/
 sudo update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 --force
 ```
+### 1) Usage for CloneGAN script, which will return 6 output images similar to the input image: 
+
+`python cloneGAN.py --image_path='notebooks/images/face_img.jpg' --NUM_OUTPUT_IMAGES=6`
+
+The result images will be saved in the directory `./outputs`.
+
+### 2) Usage for Face alignment script, which will save out a 256 x 256 face-aligned image.
+`python face_alignment.py --image_path /notebooks/images/steven_selfie.jpg`
+
+The result image will be saved in the directory `./face_alignment_outputs`. It will be 256px x 256px.
+
+
 
 ================================
 ## Original README:
