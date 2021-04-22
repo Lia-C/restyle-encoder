@@ -52,7 +52,7 @@ def project(image_path: str, output_path: str, network: str, NUM_OUTPUT_IMAGES: 
 
     EXPERIMENT_DATA_ARGS = {
         "ffhq_encode": {
-            "model_path": "pretrained_models/restyle_psp_ffhq_encode.pt",
+            "model_path": network, #"pretrained_models/restyle_psp_ffhq_encode.pt",
             # "image_path": "notebooks/images/face_img.jpg",
             "transform": transforms.Compose([
                 transforms.Resize((256, 256)),
@@ -242,7 +242,7 @@ def main():
 
     parser.add_argument('--image_path',      help='Target image file to project to', dest='image_path', required=True)
     parser.add_argument('--output_path',      help='Output FILE path. The output images will be saved with {0,1,2,3,4,5} appended to the filename.', dest='output_path', required=True)
-    parser.add_argument('--network',      help='Path to the pretrained network file.', dest='network', required=False)
+    parser.add_argument('--network',      help='Path to the pretrained network file.', dest='network', required=False, default='pretrained_models/restyle_psp_ffhq_encode.pt')
     parser.add_argument('--NUM_OUTPUT_IMAGES', help='Number of output images / steps to take', type=int, default=6)
 
     args = parser.parse_args()
