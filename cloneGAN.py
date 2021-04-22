@@ -24,7 +24,7 @@ from models.e4e import e4e
 # NUM_OUTPUT_IMAGES = 6
 # image_path = 'notebooks/images/face_img.jpg'
 
-def project(image_path: str, NUM_OUTPUT_IMAGES: int):
+def project(image_path: str, output_path: str, network: str, NUM_OUTPUT_IMAGES: int):
     experiment_type = 'ffhq_encode' #['ffhq_encode', 'cars_encode', 'church_encode', 'horse_encode', 'afhq_wild_encode', 'toonify']
 
     CODE_DIR = 'restyle-encoder'
@@ -217,18 +217,21 @@ def project(image_path: str, NUM_OUTPUT_IMAGES: int):
     # get results & save
     res, result_images = get_coupled_results(result_batch, transformed_image)
 
-    image_filename = os.path.splitext(os.path.basename(image_path))[0]
-
+    output_filename = os.path.splitext(os.path.basename(output_path))[0]
+    output_extension = os.path.splitext(os.path.basename(output_path))[1]
+    output_basedir = os.path.dirname(output_path)
 
     # SAVE OUT ORIG AS IMG
-    input_image.resize(resize_amount).save(f'./outputs/{image_filename}_orig.jpg')
+    image_filename = os.path.splitext(os.path.basename(image_path))[0]
+    input_image.resize(resize_amount).save(f'{output_basedir}/{output_filename}_orig.jpg')
 
     # SAVE OUT EACH STEP AS AN IMG
     for idx, result in enumerate(result_images):
-        Image.fromarray(np.array(result.resize(resize_amount))).save(f'./outputs/{image_filename}_result_{idx}.jpg')
+        outfile_path = f"{output_basedir}/{output_filename}_{idx}{output_extension}"
+        Image.fromarray(np.array(result.resize(resize_amount))).save(outfile_path)
 
     # SAVE FINAL SUMMARY AS IMG
-    res.save(f'./outputs/{image_filename}_results.jpg')
+    res.save(f'{output_basedir}/{output_filename}_results.jpg')
 
 
 def main():
@@ -238,11 +241,16 @@ def main():
     )
 
     parser.add_argument('--image_path',      help='Target image file to project to', dest='image_path', required=True)
+    parser.add_argument('--output_path',      help='Output FILE path. The output images will be saved with {0,1,2,3,4,5} appended to the filename.', dest='output_path', required=True)
+    parser.add_argument('--network',      help='Path to the pretrained network file.', dest='network', required=False)
     parser.add_argument('--NUM_OUTPUT_IMAGES', help='Number of output images / steps to take', type=int, default=6)
 
+    args = parser.parse_args()
+
     # make sure output folder exists, otherwise saving won’t work
-    if not os.path.exists('./outputs/'):
-        os.makedirs('./outputs/')
+    output_basedir = os.path.dirname(args.output_path)
+    if not os.path.exists(output_basedir):
+        os.makedirs(output_basedir)
 
     project(**vars(parser.parse_args()))
 
