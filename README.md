@@ -8,9 +8,26 @@ sudo update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 -
 ```
 ### 1) Usage for CloneGAN script, which will return 6 output images similar to the input image: 
 
-`python cloneGAN.py --image_path='notebooks/images/face_img.jpg' --NUM_OUTPUT_IMAGES=6`
+`!python cloneGAN.py --image_path='/content/restyle-encoder/notebooks/images/face_img.jpg' --network='/content/restyle_psp_ffhq_encode.pt' --output_path="/content/test_out/out.jpg" `
 
-The result images will be saved in the directory `./outputs`.
+
+####Arguments:
+`--image_path`: Target image file to project to. Required.
+`--output_path`: Output FILE path. The output images will be saved with {0,1,2,3,4,5} appended to the filename. Required.
+`--network`: The network file of the StyleGAN encoder. Will default to `pretrained_models/restyle_psp_ffhq_encode.pt` if not supplied.
+`--NUM_OUTPUT_IMAGES`: Number of output images / steps to take. Defaults to 6.
+
+In this example, the result images will be saved in the directory `/content/test_out`, as the filenames:
+`/content/test_out/out_0.jpg`
+`/content/test_out/out_1.jpg`
+`/content/test_out/out_2.jpg`
+`/content/test_out/out_3.jpg`
+`/content/test_out/out_4.jpg`
+`/content/test_out/out_5.jpg`
+
+Plus, the original will be saved out as `/content/test_out/out_orig.jpg`.
+A summary image of all 7 images, including the original on the far left, will also be saved out at `/content/test_out/out_results.jpg`.
+
 
 ### 2) Usage for Face alignment script, which will save out a 256 x 256 face-aligned image.
 `python face_alignment.py --image_path /notebooks/images/steven_selfie.jpg`
@@ -20,8 +37,8 @@ The result image will be saved in the directory `./face_alignment_outputs`. It w
 
 
 ================================
-## Original README:
-## ReStyle: A Residual-Based StyleGAN Encoder via Iterative Refinement
+Original README:
+#### ReStyle: A Residual-Based StyleGAN Encoder via Iterative Refinement
 
 > Recently, the power of unconditional image synthesis has significantly advanced through the use of Generative Adversarial Networks (GANs). The task of inverting an image into its corresponding latent code of the trained GAN is of utmost importance as it allows for the manipulation of real images, leveraging the rich semantics learned by the network. Recognizing the limitations of current inversion approaches, in this work we present a novel inversion scheme that extends current encoder-based inversion methods by introducing an iterative refinement mechanism. Instead of directly predicting the latent code of a given image using a single pass, the encoder is tasked with predicting a residual with respect to the current estimate of the inverted latent code in a self-correcting manner. Our residual-based encoder, named ReStyle, attains improved accuracy compared to current state-of-the-art encoder-based methods with a negligible increase in inference time. We analyze the behavior of ReStyle to gain valuable insights into its iterative nature. We then evaluate the performance of our residual encoder and analyze its robustness compared to optimization-based inversion and state-of-the-art encoders.
 
