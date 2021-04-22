@@ -34,9 +34,9 @@ A summary image of all 7 images, including the original on the far left, will al
 
 The result image will be saved in the directory `./face_alignment_outputs`. It will be 256px x 256px.
 
-\\
+\
 
-================================\\
+================================\
 Original README: \
 #### ReStyle: A Residual-Based StyleGAN Encoder via Iterative Refinement
 
