@@ -6,13 +6,13 @@ wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.z
 sudo unzip ninja-linux.zip -d /usr/local/bin/
 sudo update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 --force
 ```
-### 1) Usage for CloneGAN script, which will return 6 output images similar to the input image: 
+### 1) Usage for CloneGAN script:
 
 `!python cloneGAN.py --image_path='/content/restyle-encoder/notebooks/images/face_img.jpg' --network='/content/restyle_psp_ffhq_encode.pt' --output_path="/content/test_out/out.jpg" `
 
 
 ####Arguments:
-`--image_path`: Target image file to project to. Required.
+`--image_path`: Target image file to project to. Required. Note: This MUST be an image of a human face. The face-alignment portion of this script will error out if there is not face recognized in the photo.
 `--output_path`: Output FILE path. The output images will be saved with {0,1,2,3,4,5} appended to the filename. Required.
 `--network`: The network file of the StyleGAN encoder. Will default to `pretrained_models/restyle_psp_ffhq_encode.pt` if not supplied.
 `--NUM_OUTPUT_IMAGES`: Number of output images / steps to take. Defaults to 6.
@@ -26,8 +26,7 @@ In this example, the result images will be saved in the directory `/content/test
 `/content/test_out/out_5.jpg`
 
 Plus, the original will be saved out as `/content/test_out/out_orig.jpg`.
-A summary image of all 7 images, including the original on the far left, will also be saved out at `/content/test_out/out_results.jpg`.
-
+A summary image of all 7 images, including the original on the far right, will also be saved out at `/content/test_out/out_results.jpg`.
 
 ### 2) Usage for Face alignment script, which will save out a 256 x 256 face-aligned image.
 `python face_alignment.py --image_path /notebooks/images/steven_selfie.jpg`
