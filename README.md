@@ -12,10 +12,10 @@ sudo update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 -
 
 
 ####Arguments:
-`--image_path`: Target image file to project to. Required. Note: This MUST be an image of a human face. The face-alignment portion of this script will error out if there is not face recognized in the photo.
-`--output_path`: Output FILE path. The output images will be saved with {0,1,2,3,4,5} appended to the filename. Required.
-`--network`: The network file of the StyleGAN encoder. Will default to `pretrained_models/restyle_psp_ffhq_encode.pt` if not supplied.
-`--NUM_OUTPUT_IMAGES`: Number of output images / steps to take. Defaults to 6.
+* `--image_path`: Target image file to project to. Required. Note: This MUST be an image of a human face. The face-alignment portion of this script will error out if there is no face recognized in the photo.
+* `--output_path`: Output FILE path. The output images will be saved with {0,1,2,3,4,5} appended to the filename. Required.
+* `--network`: The network file of the StyleGAN encoder. Will default to `pretrained_models/restyle_psp_ffhq_encode.pt` if not supplied.
+* (optional) `--NUM_OUTPUT_IMAGES`: Number of output images / steps to take. Defaults to 6.
 
 In this example, the result images will be saved in the directory `/content/test_out`, as the filenames:
 `/content/test_out/out_0.jpg`
