@@ -26,6 +26,7 @@ In this example, the result images will be saved in the directory `/content/test
 `/content/test_out/out_5.jpg`
 
 Plus, the original will be saved out as `/content/test_out/out_orig.jpg`.
+
 A summary image of all 7 images, including the original on the far right, will also be saved out at `/content/test_out/out_results.jpg`.
 
 ### 2) Usage for Face alignment script, which will save out a 256 x 256 face-aligned image.
