@@ -240,7 +240,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
 
-    parser.add_argument('--image_path',      help='Target image file to project to', dest='image_path', required=True)
+    parser.add_argument('--image_path',      help='Target image file to project to. Note: This MUST be an image of a human face. The face-alignment portion of this script will error out if there is not face recognized in the photo.', dest='image_path', required=True)
     parser.add_argument('--output_path',      help='Output FILE path. The output images will be saved with {0,1,2,3,4,5} appended to the filename.', dest='output_path', required=True)
     parser.add_argument('--network',      help='Path to the pretrained network file.', dest='network', required=False, default='pretrained_models/restyle_psp_ffhq_encode.pt')
     parser.add_argument('--NUM_OUTPUT_IMAGES', help='Number of output images / steps to take', type=int, default=6)
