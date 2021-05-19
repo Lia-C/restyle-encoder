@@ -28,6 +28,7 @@ def main():
     )
 
     parser.add_argument('--image_path',  help='Input path to face image, needs to be square and RGB', dest='image_path', required=True)
+    parser.add_argument('--output_path',  help='Output file path, will be saved as a 256px x 256px image. JPG will work.', dest='output_path', required=True)
   
     # make sure output folder exists, otherwise saving won’t work
     if not os.path.exists('./face_alignment_outputs/'):
@@ -37,8 +38,7 @@ def main():
     
     aligned_image = run_alignment(args.image_path)
 
-    image_filename = os.path.splitext(os.path.basename(args.image_path))[0]
-    aligned_image.save(f'./face_alignment_outputs/{image_filename}_aligned.jpg')
+    aligned_image.save(args.output_path)
 
 #----------------------------------------------------------------------------
 
