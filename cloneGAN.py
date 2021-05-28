@@ -24,6 +24,33 @@ from models.e4e import e4e
 # NUM_OUTPUT_IMAGES = 6
 # image_path = 'notebooks/images/face_img.jpg'
 
+
+resize_amount = (1024,1024)
+
+# SAVE OUT OUTPUT IMAGES
+def saveResults(result_images, output_path):
+
+    output_filename = os.path.splitext(os.path.basename(output_path))[0]
+    output_extension = os.path.splitext(os.path.basename(output_path))[1]
+    output_basedir = os.path.dirname(output_path)
+
+    # make sure output folder exists, otherwise saving won’t work
+    if not os.path.exists(output_basedir):
+        os.makedirs(output_basedir)
+
+    # SAVE OUT ORIG AS IMG
+    # image_filename = os.path.splitext(os.path.basename(image_path))[0]
+    # input_image.resize(resize_amount).save(f'{output_basedir}/{output_filename}_orig.jpg')
+
+    # SAVE OUT EACH STEP AS AN IMG
+    for idx, result in enumerate(result_images):
+        outfile_path = f"{output_basedir}/{output_filename}_{idx}{output_extension}"
+        Image.fromarray(np.array(result.resize(resize_amount))).save(outfile_path)
+
+    # SAVE FINAL SUMMARY AS IMG
+    # res.save(f'{output_basedir}/{output_filename}_results.jpg')
+
+
 def project(image_path: str, output_path: str, network: str, NUM_OUTPUT_IMAGES: int):
     experiment_type = 'ffhq_encode' #['ffhq_encode', 'cars_encode', 'church_encode', 'horse_encode', 'afhq_wild_encode', 'toonify']
 
@@ -40,7 +67,6 @@ def project(image_path: str, output_path: str, network: str, NUM_OUTPUT_IMAGES: 
 
     MODEL_PATHS = {
         "ffhq_encode": {"id": "1sw6I2lRIB0MpuJkpc8F5BJiSZrc0hjfE", "name": "restyle_psp_ffhq_encode.pt"},
-        # "cars_encode": {"id": "1zJHqHRQ8NOnVohVVCGbeYMMr6PDhRpPR", "name": "restyle_psp_cars_encode.pt"},
         # "church_encode": {"id": "1bcxx7mw-1z7dzbJI_z7oGpWG1oQAvMaD", "name": "restyle_psp_church_encode.pt"},
         # "horse_encode": {"id": "19_sUpTYtJmhSAolKLm3VgI-ptYqd-hgY", "name": "restyle_e4e_horse_encode.pt"},
         # "afhq_wild_encode": {"id": "1GyFXVTNDUw3IIGHmGS71ChhJ1Rmslhk7", "name": "restyle_psp_afhq_wild_encode.pt"},
@@ -59,14 +85,6 @@ def project(image_path: str, output_path: str, network: str, NUM_OUTPUT_IMAGES: 
                 transforms.ToTensor(),
                 transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
         },
-        # "cars_encode": {
-        #     "model_path": "pretrained_models/restyle_psp_cars_encode.pt",
-        #     "image_path": "notebooks/images/car_img.jpg",
-        #     "transform": transforms.Compose([
-        #         transforms.Resize((192, 256)),
-        #         transforms.ToTensor(),
-        #         transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
-        # },
         # "church_encode": {
         #     "model_path": "pretrained_models/restyle_psp_church_encode.pt",
         #     "image_path": "notebooks/images/church_img.jpg",
@@ -115,12 +133,53 @@ def project(image_path: str, output_path: str, network: str, NUM_OUTPUT_IMAGES: 
         print(f'ReStyle model for {experiment_type} already exists!')
 
 
-    # LOAD PRETRAINED MODEL
 
+    # MOVE INFERENCE FUNCTIONS AND PRE-DECLARATIONS OUTSIDE OF INFINITE LOOP
+    def get_avg_image(net):
+        avg_image = net(net.latent_avg.unsqueeze(0),
+                        input_code=True,
+                        randomize_noise=False,
+                        return_latents=False,
+                        average_code=True)[0]
+        avg_image = avg_image.to('cuda').float().detach()
+        if experiment_type == "cars_encode":
+            avg_image = avg_image[:, 32:224, :]
+        return avg_image
+
+
+    from utils.inference_utils import run_on_batch
+
+
+    # MOVE FUNCTION TO DISPLAY RESULTS OUTSIDE OF LOOP
+    def get_coupled_results(result_batch, transformed_image):
+      """
+      Visualize output images from left to right (the input image is on the right)
+      """
+      result_tensors = result_batch[0]  # there's one image in our batch
+      result_images = [tensor2im(result_tensors[iter_idx]) for iter_idx in range(opts.n_iters_per_batch)]
+      input_im = tensor2im(transformed_image)
+      res = np.array(result_images[0].resize(resize_amount))
+      for idx, result in enumerate(result_images[1:]):
+          res = np.concatenate([res, np.array(result.resize(resize_amount))], axis=1)
+      res = np.concatenate([res, input_im.resize(resize_amount)], axis=1)
+      res = Image.fromarray(res)
+      return res, result_images
+
+##### ADD INFINITE LOOP ################################################################
+    time_before = time.time()
+
+
+    # LOAD PRETRAINED MODEL
     model_path = EXPERIMENT_ARGS['model_path']
     ckpt = torch.load(model_path, map_location='cpu')
 
     opts = ckpt['opts']
+
+    # resize_amount = (256, 256) if opts.resize_outputs else (opts.output_size, opts.output_size)
+
+    # number of output images
+    opts['n_iters_per_batch'] = NUM_OUTPUT_IMAGES 
+    opts['resize_outputs'] = False  # generate outputs at full resolution
 
     # update the training options
     opts['checkpoint_path'] = model_path
@@ -135,55 +194,42 @@ def project(image_path: str, output_path: str, network: str, NUM_OUTPUT_IMAGES: 
     net.cuda()
     print('Model successfully loaded!')
 
+    time_after_loading = time.time()
+    print('Time to load model took {:.4f} seconds.'.format(time_after_loading - time_before))
+
     # VISUALIZE INPUT
     # image_path = EXPERIMENT_DATA_ARGS[experiment_type]["image_path"]
     original_image = Image.open(image_path).convert("RGB")
 
-    if experiment_type == 'cars_encode':
-        original_image = original_image.resize((192, 256))
-    else:
-        original_image = original_image.resize((256, 256))
+    # if experiment_type == 'cars_encode':
+    #     original_image = original_image.resize((192, 256))
+    # else:
+    #     original_image = original_image.resize((256, 256))
 
 
     # ALIGN IMAGE
-    def run_alignment(image_path):
-        import dlib
-        from scripts.align_faces_parallel import align_face
-        if not os.path.exists("shape_predictor_68_face_landmarks.dat"):
-            print('Downloading files for aligning face image...')
-            os.system('wget http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2')
-            os.system('bzip2 -dk shape_predictor_68_face_landmarks.dat.bz2')
-            print('Done.')
-        predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
-        aligned_image = align_face(filepath=image_path, predictor=predictor) 
-        print("Aligned image has shape: {}".format(aligned_image.size))
-        return aligned_image 
+    # def run_alignment(image_path):
+    #     import dlib
+    #     from scripts.align_faces_parallel import align_face
+    #     if not os.path.exists("shape_predictor_68_face_landmarks.dat"):
+    #         print('Downloading files for aligning face image...')
+    #         os.system('wget http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2')
+    #         os.system('bzip2 -dk shape_predictor_68_face_landmarks.dat.bz2')
+    #         print('Done.')
+    #     predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+    #     aligned_image = align_face(filepath=image_path, predictor=predictor) 
+    #     print("Aligned image has shape: {}".format(aligned_image.size))
+    #     return aligned_image 
 
-    if experiment_type in ['ffhq_encode', 'toonify']:
-        input_image = run_alignment(image_path)
-    else:
-        input_image = original_image
+    # if experiment_type in ['ffhq_encode', 'toonify']:
+    #     input_image = run_alignment(image_path)
+    # else:
+    #     input_image = original_image
+    input_image = original_image
 
     # PERFORM INFERENCE
     img_transforms = EXPERIMENT_ARGS['transform']
     transformed_image = img_transforms(input_image)
-
-    def get_avg_image(net):
-        avg_image = net(net.latent_avg.unsqueeze(0),
-                        input_code=True,
-                        randomize_noise=False,
-                        return_latents=False,
-                        average_code=True)[0]
-        avg_image = avg_image.to('cuda').float().detach()
-        if experiment_type == "cars_encode":
-            avg_image = avg_image[:, 32:224, :]
-        return avg_image
-
-    # number of output images
-    opts.n_iters_per_batch = NUM_OUTPUT_IMAGES 
-    opts.resize_outputs = False  # generate outputs at full resolution
-
-    from utils.inference_utils import run_on_batch
 
     with torch.no_grad():
         avg_image = get_avg_image(net)
@@ -194,44 +240,14 @@ def project(image_path: str, output_path: str, network: str, NUM_OUTPUT_IMAGES: 
 
 
     # VISUALIZE RESULT
-    if opts.dataset_type == "cars_encode":
-        resize_amount = (256, 192) if opts.resize_outputs else (512, 384)
-    else:
-        resize_amount = (256, 256) if opts.resize_outputs else (opts.output_size, opts.output_size)
-
-    def get_coupled_results(result_batch, transformed_image):
-        """
-        Visualize output images from left to right (the input image is on the right)
-        """
-        result_tensors = result_batch[0]  # there's one image in our batch
-        result_images = [tensor2im(result_tensors[iter_idx]) for iter_idx in range(opts.n_iters_per_batch)]
-        input_im = tensor2im(transformed_image)
-        res = np.array(result_images[0].resize(resize_amount))
-        for idx, result in enumerate(result_images[1:]):
-            res = np.concatenate([res, np.array(result.resize(resize_amount))], axis=1)
-        res = np.concatenate([res, input_im.resize(resize_amount)], axis=1)
-        res = Image.fromarray(res)
-        return res, result_images
-
 
     # get results & save
     res, result_images = get_coupled_results(result_batch, transformed_image)
 
-    output_filename = os.path.splitext(os.path.basename(output_path))[0]
-    output_extension = os.path.splitext(os.path.basename(output_path))[1]
-    output_basedir = os.path.dirname(output_path)
+    time_after = time.time()
+    print('Time to load model, perform projection, and save out the results took {:.4f} seconds.'.format(time_after - time_before))
 
-    # SAVE OUT ORIG AS IMG
-    image_filename = os.path.splitext(os.path.basename(image_path))[0]
-    input_image.resize(resize_amount).save(f'{output_basedir}/{output_filename}_orig.jpg')
-
-    # SAVE OUT EACH STEP AS AN IMG
-    for idx, result in enumerate(result_images):
-        outfile_path = f"{output_basedir}/{output_filename}_{idx}{output_extension}"
-        Image.fromarray(np.array(result.resize(resize_amount))).save(outfile_path)
-
-    # SAVE FINAL SUMMARY AS IMG
-    res.save(f'{output_basedir}/{output_filename}_results.jpg')
+    return res, result_images
 
 
 def main():
@@ -247,12 +263,13 @@ def main():
 
     args = parser.parse_args()
 
-    # make sure output folder exists, otherwise saving won’t work
-    output_basedir = os.path.dirname(args.output_path)
-    if not os.path.exists(output_basedir):
-        os.makedirs(output_basedir)
+    # PROJECT
+    res, result_images = project(**vars(parser.parse_args()))   
 
-    project(**vars(parser.parse_args()))
+    # SAVE OUT
+    saveResults(result_images, args.output_path)
+
+
 
 #----------------------------------------------------------------------------
 
