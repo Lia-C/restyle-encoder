@@ -133,7 +133,6 @@ def run_alignment(base64imgstring):
     # parse base64 img string to img array
     binary_img = base64.b64decode(base64imgstring)
     img_PIL = Image.open(io.BytesIO(binary_img))
-    img_PIL 
     
     time1 = time.time()
     if not os.path.exists("shape_predictor_68_face_landmarks.dat"):
