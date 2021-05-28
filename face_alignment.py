@@ -157,7 +157,7 @@ def run_alignment(base64imgstring):
 
     # parse PIL image back out to base64 string
     buffered = io.BytesIO()
-    aligned_image.save(buffered, format="JPEG")
+    aligned_image.save(buffered, format="PNG")
     aligned_image_base64str = base64.b64encode(buffered.getvalue())
     return aligned_image_base64str 
 
