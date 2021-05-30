@@ -82,8 +82,8 @@ def align_face(img, predictor):
     quad = np.stack([c - x - y, c - x + y, c + x + y, c + x - y])
     qsize = np.hypot(*x) * 2
 
-    output_size = 256
-    transform_size = 256
+    output_size = 512
+    transform_size = 512
     enable_padding = True
 
     # Shrink.
