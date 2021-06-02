@@ -7,7 +7,7 @@ sudo unzip ninja-linux.zip -d /usr/local/bin/
 sudo update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 --force
 ```
 ## Usage
-### 1) get_vector.py, which will save out the w-vector for the input image specified in the json.
+### 1) get_vector.py, which will save out the w-vector for the face-aligned image specified in the json.
 `python get_vector.py --verbose --sleep_time=1000 --network_path=/content/restyle-encoder/restyle_psp_ffhq_encode.pt --json_path=/content/restyle-encoder/get_vector_input_img.json`
 
 `sleep_time` is in milliseconds. 
