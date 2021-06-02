@@ -11,7 +11,7 @@ sudo update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 -
 `python get_vector.py --verbose --sleep_time=1000 --network_path=/content/restyle-encoder/restyle_psp_ffhq_encode.pt --json_path=/content/restyle-encoder/get_vector_input_img.json`
 
 `sleep_time` is in milliseconds. 
-This script contains an infinite loop to check for the JSON at the specificed path. If not found, it will sleep for `sleep_time` milliseconds.
+This script contains an infinite loop to check for the JSON at the specified path. If not found, it will sleep for `sleep_time` milliseconds.
 
 The result vector will be saved out as `w_vector.npy` in the output path specified in the JSON. Here is a sample JSON:
 ```
@@ -22,7 +22,7 @@ The result vector will be saved out as `w_vector.npy` in the output path specifi
 ```
 When done, it will also create a file called `w_vector.done` in the output path. 
 
-###  * How to use cloneGAN.py, which will output 6 images close to the inputted face iamge.
+###  * How to use cloneGAN.py, which will output 6 images close to the inputted face image.
 
 `!python cloneGAN.py --image_path='/content/restyle-encoder/notebooks/images/face_img.jpg' --network='/content/restyle_psp_ffhq_encode.pt' --output_path="/content/test_out/out.jpg" `
 
