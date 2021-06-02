@@ -6,7 +6,7 @@ wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.z
 sudo unzip ninja-linux.zip -d /usr/local/bin/
 sudo update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 --force
 ```
-### 1) Usage for CloneGAN script:
+### 1) Usage for cloneGAN.py, which will output 6 images close to the inputted face iamge.
 
 `!python cloneGAN.py --image_path='/content/restyle-encoder/notebooks/images/face_img.jpg' --network='/content/restyle_psp_ffhq_encode.pt' --output_path="/content/test_out/out.jpg" `
 
@@ -37,9 +37,10 @@ The result image will be saved in the directory `./face_alignment_outputs`. It w
 ### 2) Usage for get_vector.py, which will save out the w-vector for the input image specified in the json.
 `python get_vector.py --verbose --sleep_time=1000 --network_path=/content/restyle-encoder/restyle_psp_ffhq_encode.pt --json_path=/content/restyle-encoder/get_vector_input_img.json`
 
-`sleep_time` is in milliseconds.
+`sleep_time` is in milliseconds. 
+This script contains an infinite loop to check for the JSON at the specificed path. If not found, it will sleep for `sleep_time` milliseconds.
 
-The result vector will be saved out as `w5-vector.npy` in the output path specified in the JSON. Here is a sample JSON:
+The result vector will be saved out as `w_vector.npy` in the output path specified in the JSON. Here is a sample JSON:
 ```
 {
    "input_path": "/content/steven_headshot_sq_512.jpg",
