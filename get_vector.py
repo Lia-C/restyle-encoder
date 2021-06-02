@@ -23,48 +23,6 @@ experiment_type = 'ffhq_encode' #['ffhq_encode', 'toonify']
 CODE_DIR = 'restyle-encoder'
 NUM_STEPS = 6
 
-# SAVE OUT OUTPUT IMAGES
-def saveResults(result_images, output_path):
-
-    output_filename = 'out'
-    output_extension ='jpg'
-    output_basedir = output_path
-
-    # make sure output folder exists, otherwise saving won’t work
-    if not os.path.exists(output_basedir):
-        os.makedirs(output_basedir)
-
-    # SAVE OUT ORIG AS IMG
-    # image_filename = os.path.splitext(os.path.basename(image_path))[0]
-    # input_image.resize(resize_amount).save(f'{output_basedir}/{output_filename}_orig.jpg')
-
-    # SAVE OUT EACH STEP AS AN IMG
-    for idx, result in enumerate(result_images):
-        outfile_path = f"{output_basedir}/{output_filename}_{idx}.{output_extension}"
-        Image.fromarray(np.array(result.resize(resize_amount))).save(outfile_path)
-
-    # SAVE FINAL SUMMARY AS IMG
-    # res.save(f'{output_basedir}/{output_filename}_results.jpg')
-
-
-# def main():
-#     parser = argparse.ArgumentParser(
-#         description='Project given image.',
-#         formatter_class=argparse.RawDescriptionHelpFormatter
-#     )
-
-#     parser.add_argument('--image_path',      help='Target image file to project to. Note: This MUST be an image of a human face. The face-alignment portion of this script will error out if there is no face recognized in the photo.', dest='image_path', required=True)
-#     parser.add_argument('--output_path',      help='Output FILE path. The output images will be saved with {0,1,2,3,4,5} appended to the filename.', dest='output_path', required=True)
-#     parser.add_argument('--network',      help='Path to the pretrained network file.', dest='network', required=False, default='pretrained_models/restyle_psp_ffhq_encode.pt')
-#     parser.add_argument('--NUM_OUTPUT_IMAGES', help='Number of output images / steps to take', type=int, default=6)
-
-#     args = parser.parse_args()
-
-#     # PROJECT
-#     res, result_images = project(**vars(parser.parse_args()))   
-
-#     # SAVE OUT
-#     saveResults(result_images, args.output_path)
 
 def get_avg_image(net):
     avg_image = net(net.latent_avg.unsqueeze(0),
@@ -230,20 +188,18 @@ def process(input_path, output_path, verbose, preloaded_params):
             print('Inference took {:.4f} seconds.'.format(toc - tic))
 
 
-    # VISUALIZE RESULT
+    # KEEP LAST W-VECTOR
+    w_last = result_latents[0][NUM_STEPS-1]
 
-    # get results & save
-    res, result_images = get_coupled_results(result_batch, transformed_image)
+    
+    # make sure output folder exists, otherwise saving won’t work
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    np.save(f'{output_path}/w5_vector.npy', w_last, allow_pickle=True)
 
     time_after = time.time()
     if verbose:
         print('Time to load img and get its w-vector took {:.4f} seconds.'.format(time_after - time_before))
-
-#     # SAVE OUT
-    saveResults(result_images, output_path)
-    # return res, result_images
-
-
 
 def doLoop(preloaded_params, json_path, sleep_time, verbose):
         
@@ -254,12 +210,9 @@ def doLoop(preloaded_params, json_path, sleep_time, verbose):
             json_dict = parse_json(json_path)
 
             # del json
-
-# ADD THIS BACK IN LATER TOOOOOO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-            # if verbose:
-            #     print(f'Deleting JSON.')
-            # os.remove(json_path)
+            if verbose:
+                print(f'Deleting JSON.')
+            os.remove(json_path)
 
             process(json_dict['input_path'], json_dict['output_path'], verbose, preloaded_params)
 
@@ -272,16 +225,13 @@ def doLoop(preloaded_params, json_path, sleep_time, verbose):
 
 
 def start(preloaded_params, json_path, sleep_time, verbose):
-    doLoop(preloaded_params, json_path, sleep_time, verbose)
-
-# ADD THIS BACK IN LATER TOOOOOO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    # try:
-    #     doLoop(preloaded_params, json_path, sleep_time, verbose)
-    # except:
-    #     if verbose:
-    #         print(f'Exception thrown during loop. Re-entering loop.')
-    #     start(preloaded_params, json_path, sleep_time, verbose)
+    # doLoop(preloaded_params, json_path, sleep_time, verbose)
+    try:
+        doLoop(preloaded_params, json_path, sleep_time, verbose)
+    except:
+        if verbose:
+            print(f'Exception thrown during loop. Re-entering loop.')
+        start(preloaded_params, json_path, sleep_time, verbose)
 
 
 def main():
