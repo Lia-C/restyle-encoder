@@ -6,7 +6,23 @@ wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.z
 sudo unzip ninja-linux.zip -d /usr/local/bin/
 sudo update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 --force
 ```
-### 1) Usage for cloneGAN.py, which will output 6 images close to the inputted face iamge.
+
+### How to use get_vector.py, which will save out the w-vector for the input image specified in the json.
+`python get_vector.py --verbose --sleep_time=1000 --network_path=/content/restyle-encoder/restyle_psp_ffhq_encode.pt --json_path=/content/restyle-encoder/get_vector_input_img.json`
+
+`sleep_time` is in milliseconds. 
+This script contains an infinite loop to check for the JSON at the specificed path. If not found, it will sleep for `sleep_time` milliseconds.
+
+The result vector will be saved out as `w_vector.npy` in the output path specified in the JSON. Here is a sample JSON:
+```
+{
+   "input_path": "/content/steven_headshot_sq_512.jpg",
+   "output_path": "/content/restyle-encoder/test"
+}
+```
+When done, it will also create a file called `w_vector.done` in the output path. 
+
+###  How to use cloneGAN.py, which will output 6 images close to the inputted face iamge.
 
 `!python cloneGAN.py --image_path='/content/restyle-encoder/notebooks/images/face_img.jpg' --network='/content/restyle_psp_ffhq_encode.pt' --output_path="/content/test_out/out.jpg" `
 
@@ -29,25 +45,13 @@ Plus, the original will be saved out as `/content/test_out/out_orig.jpg`.
 
 A summary image of all 7 images, including the original on the far right, will also be saved out at `/content/test_out/out_results.jpg`.
 
-### 2) Usage for Face alignment script, which will save out a 256 x 256 face-aligned image.
-`python face_alignment.py --image_path /notebooks/images/steven_selfie.jpg`
+###  How to use face_alignment.py
 
+This script has since been modified to accept a base64 string and return a base64 string. It does not have a command line interface anymore.
+~~`python face_alignment.py --image_path /notebooks/images/steven_selfie.jpg`
 The result image will be saved in the directory `./face_alignment_outputs`. It will be 256px x 256px.
 
-### 2) Usage for get_vector.py, which will save out the w-vector for the input image specified in the json.
-`python get_vector.py --verbose --sleep_time=1000 --network_path=/content/restyle-encoder/restyle_psp_ffhq_encode.pt --json_path=/content/restyle-encoder/get_vector_input_img.json`
 
-`sleep_time` is in milliseconds. 
-This script contains an infinite loop to check for the JSON at the specificed path. If not found, it will sleep for `sleep_time` milliseconds.
-
-The result vector will be saved out as `w_vector.npy` in the output path specified in the JSON. Here is a sample JSON:
-```
-{
-   "input_path": "/content/steven_headshot_sq_512.jpg",
-   "output_path": "/content/restyle-encoder/test"
-}
-```
-When done, it will also create a file called `w_vector.done` in the output path. 
 
 ================================\
 Original README: 
