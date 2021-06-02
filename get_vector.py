@@ -9,6 +9,7 @@ from PIL import Image
 import torch
 import torchvision.transforms as transforms
 import json
+from pathlib import Path
 
 sys.path.append(".")
 sys.path.append("..")
@@ -195,11 +196,15 @@ def process(input_path, output_path, verbose, preloaded_params):
     # make sure output folder exists, otherwise saving won’t work
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-    np.save(f'{output_path}/w5_vector.npy', w_last, allow_pickle=True)
+    np.save(f'{output_path}/w_vector.npy', w_last, allow_pickle=True)
 
     time_after = time.time()
     if verbose:
         print('Time to load img and get its w-vector took {:.4f} seconds.'.format(time_after - time_before))
+    
+    # Emit DONE signal
+    Path(f'{output_path}/w_vector.done').touch()
+
 
 def doLoop(preloaded_params, json_path, sleep_time, verbose):
         
